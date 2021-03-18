@@ -11,11 +11,36 @@ defmodule Transaction do
       transactions
   end
 
-  def get_all(), do: get_transactions()
-
   defp get_transactions() do
     {:ok, binary} = File.read(@transactions)
     binary
     |> :erlang.binary_to_term()
+  end
+
+  def get_all(), do: get_transactions()
+
+  def get_by_year(year), do: Enum.filter(get_transactions(), &(&1.date.year == year))
+
+  def get_by_month(month), do: Enum.filter(get_transactions(), &(&1.date.year == year && &1.date.month == month))
+
+  def get_by_day(date), do: Enum.filter(get_transactions(), &(&1.date == date))
+
+  defp calc(transactions) do
+    Enum.reduce(transactions, 0, fn x, acc -> acc + x.value  end)
+  end
+
+  def calc_by_month(year, month) do
+    transactions = get_by_month(year, month)
+    {transactions, calc(transactions)}
+  end
+
+  def calc_by_year(year) do
+    transactions = get_by_year(year)
+    {transactions, calc(transactions)}
+  end
+
+  def calc_by_day(date) do
+    transactions = get_by_day(date)
+    {transactions, calc(transactions)}
   end
 end
